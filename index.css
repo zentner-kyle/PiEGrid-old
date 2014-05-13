@@ -1,0 +1,22 @@
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: #000;
+  color: #fff;
+  overflow: hidden;
+}
+
+#titleBar {
+  width: 100%;
+  padding: 0.5em;
+  font-size: 1.5em;
+}
+
+#mainSvg {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  position: absolute;
+}
