@@ -111,19 +111,19 @@ Grid.prototype.clipInto = function (p, xClip, yClip, zClip) {
   }
   var out = p;
   if (p[0] - xClip < 0 || isNaN(p[0])) {
-    out = Vector(0, out[1], out[2]);
+    out = Vector(xClip, out[1], out[2]);
   } else if (p[0] + xClip >= this.dims[0]) {
     out = Vector(this.dims[0] - xClip, out[1], out[2]);
   }
 
   if (p[1] - yClip < 0 || isNaN(p[1])) {
-    out = Vector(out[0], 0, out[2]);
+    out = Vector(out[0], yClip, out[2]);
   } else if (p[1] + yClip >= this.dims[1]) {
     out = Vector(out[0], this.dims[1] - yClip, out[2]);
   }
 
   if (p[2] - zClip < 0 || isNaN(p[2])) {
-    out = Vector(out[0], out[1], 0);
+    out = Vector(out[0], out[1], zClip);
   } else if (p[2] + zClip >= this.dims[2]) {
     out = Vector(out[0], out[1], this.dims[2] - zClip);
   }
