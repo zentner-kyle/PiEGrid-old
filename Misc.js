@@ -22,6 +22,6 @@ function round(val, amount) {
   if (amount === undefined) {
     return 0 | (val + 0.5);
   } else {
-    return amount * (0 | (val + 0.5 * amount));
+    return amount * (0 | ((val / amount) + 0.5));
   }
 }
