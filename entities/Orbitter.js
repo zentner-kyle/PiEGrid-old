@@ -1,6 +1,11 @@
+// A little, bird-like triangle which likes to orbit other Entitys.
+// Flys on the third floor.
+// Not solid.
+// Created by Kyle Zentner.
+
 var Orbitter = function (pos, world) {
   Entity.call(this, pos);
-  this.refreshRate = 0 | (world.prng() * 10);
+  this.refreshRate = world.prng() * 0.01;
   this.target = this.findTarget(world);
 };
 
@@ -12,7 +17,7 @@ Orbitter.populate = function (world) {
     var cell = world.randomCell();
     cell = Vector(cell[0], cell[1], 2);
     if (!hasSolid(world.grid, cell)) {
-      world.addEntity(cell, new Orbitter(cell, world));
+      world.addEntity(new Orbitter(cell, world), cell);
     }
   }
 };
@@ -35,14 +40,14 @@ Orbitter.prototype.update = function (world, view, dT) {
   var dist = Math.sqrt(d[0] * d[0] + d[1] * d[1]);
   var r = Math.atan2(d[1], d[0]);
   var oldR = r;
-  var dR = dT * 2 * Math.PI * (1 / this.refreshRate);
+  var dR = dT * 2 * Math.PI * (0.001 / this.refreshRate);
   r += dR;
   var dP = Vector(Math.cos(r), Math.sin(r), 2).scale(0.6 + 5 * dist / 8);
-  var newPos = world.grid.clipInto(this.target.pos.add(dP), 1);
+  var newPos = world.grid.clipInto(this.target.pos.add(dP), 1, 1);
   if (!hasSolid(world.grid, newPos.round())) {
-    world.grid.pop(this);
+    world.grid.removeEntity(this);
     this.pos = newPos;
-    world.grid.push(this);
+    world.grid.addEntity(this);
   }
   var pxPos = view.getPx(this.pos);
   var oldPxPos = view.getPx(oldPos);

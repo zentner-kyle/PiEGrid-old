@@ -1,3 +1,6 @@
+// A solid entity which fills the bottom floor.
+// Created by Kyle Zentner.
+
 var Stone = function (pos) {
   Entity.call(this, pos);
   this.solid = true;

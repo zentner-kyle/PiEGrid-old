@@ -1,3 +1,6 @@
+
+// The root type for all entities placed in the Grid/World.
+
 var Entity = function (pos) {
   if (pos === undefined ||
       pos[0] === undefined ||

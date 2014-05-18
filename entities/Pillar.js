@@ -1,3 +1,6 @@
+// Random, solid blocks on the second floor.
+// Created by Kyle Zentner.
+
 var Pillar = function (pos) {
   Entity.call(this, pos);
   this.solid = true;
@@ -18,6 +21,6 @@ Pillar.prototype.view = function (world, view) {
 Pillar.populate = function (world) {
   for (var i = 0; i < 40; i++) {
     var cell = this.randomCell();
-    world.grid.push(new Pillar(Vector(cell[0], cell[1], 1), world));
+    world.grid.addEntity(new Pillar(Vector(cell[0], cell[1], 1), world));
   }
 };

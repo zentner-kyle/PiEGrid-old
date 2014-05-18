@@ -1,3 +1,11 @@
+// Represents a grid world.
+
+// Create a new World.
+// inPlace is optional, and specifies whether updates to the world produce new 
+// worlds, or modify the current one.
+// seed is a seed used to start the pseudo-random number generator.
+// It is also optional, and defaults to 'WorldSeed'.
+// Currently, the world size is hard-coded to 40, 40, 3.
 var World = function (inPlace, seed) {
   if (seed === undefined) {
     seed = 'WorldSeed';
@@ -7,50 +15,73 @@ var World = function (inPlace, seed) {
   this.prng = new Math.seedrandom(seed);
   this.refreshList = [];
   this.tick = 0;
-  this.entityPrototypes = [];
+  this.entityTypes = [];
+  this.totalTime = 0;
 };
 
-World.prototype.getTime = getTime;
+// Get the current world age in seconds.
+World.prototype.age = function () {
+  return this.totalTime;
+}
 
-World.prototype.addEntityPrototype = function (proto) {
-  this.entityPrototypes.push(proto);
+// Add a new type of Entity to the world.
+// All such types will be used to populate the world.
+World.prototype.addEntityType = function (proto) {
+  this.entityTypes.push(proto);
 };
 
-World.prototype.addEntity = function (p, entity) {
+// Add an entity to the world.
+World.prototype.addEntity = function (entity, p) {
   if (entity.refreshRate) {
-    this.refreshList.push([entity.refreshRate, entity, this.getTime()]);
+    this.refreshList.push({
+      entity: entity,
+      lastUpdate: this.age(),
+      nextUpdate: this.age() + entity.refreshRate
+    });
   }
-  this.grid.addEntity(p, entity);
+  this.grid.addEntity(entity, p);
 };
 
-World.prototype.update = function (view) {
-  ++this.tick;
-  for (var i = 0; i < this.refreshList.length; i++) {
-    if (this.tick % this.refreshList[i][0] === 0) {
-      this.refreshList[i][1].update(this, view,
-          (this.getTime() - this.refreshList[i][2]) / 1000);
-      this.refreshList[i][2] = this.getTime();
+// Update the world, where the first argument is the View, and the second is 
+// the second is the change in time of the update in seconds.
+World.prototype.update = function (view, dT) {
+  return this.change(function () {
+    this.totalTime += dT;
+    ++this.tick;
+    for (var i = 0; i < this.refreshList.length; i++) {
+      var ref = this.refreshList[i];
+      if (this.totalTime >= ref.nextUpdate) {
+        ref.entity.update(this, view,
+            (this.totalTime - ref.lastUpdate));
+        ref.lastUpdate = this.age();
+        ref.nextUpdate = this.age() + ref.entity.refreshRate;
+      }
     }
-  }
+  });
 };
 
+// Populate the world, using all the entity tpes types that have been added to 
+// the world.
 World.prototype.populate = function () {
   var world = this;
-  for (var i in this.entityPrototypes) {
-    world = this.change(this.entityPrototypes[i].populate);
+  for (var i in this.entityTypes) {
+    world = this.change(this.entityTypes[i].populate);
   }
   return world;
 };
 
+// Pick a random cell in the world.
 World.prototype.randomCell = function () {
   var x = this.prng();
   var y = this.prng();
   var z = this.prng();
-  return Vector(this.grid.dims[0] * x,
-                this.grid.dims[1] * y,
-                this.grid.dims[2] * z).round();
+  var dims = Vector(1, 1, 1).neg().add(this.grid.dims);
+  return Vector(dims[0] * x,
+                dims[1] * y,
+                dims[2] * z).round();
 };
 
+// Create a (deep) clone of this world.
 World.prototype.clone = function () {
   var out = new World();
   out.grid = this.grid.clone();
@@ -58,6 +89,9 @@ World.prototype.clone = function () {
   return out;
 };
 
+// Calls a function with the this parameter and the first argument set to 
+// either a clone of this world or this world itself, if this world is in 
+// place.
 World.prototype.change = function (func) {
   if (this.inPlace) {
     var next = this;

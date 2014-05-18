@@ -1,18 +1,23 @@
 var theView;
 var theWorld;
 
+// Convert wasd hjkl keys into view accelerations.
 function keyToAccel(key) {
   var speed = theView.pxPerCell * 15.0;
   switch (key) {
+    case 'h': // Fallthrough
     case 'a':
       return Vector(speed, 0);
       break;
+    case 'k': // Fallthrough
     case 'w':
       return Vector(0, speed);
       break;
+    case 'l': // Fallthrough
     case 'd':
       return Vector(-speed, 0);
       break;
+    case 'j': // Fallthrough
     case 's':
       return Vector(0, -speed);
       break;
@@ -20,9 +25,9 @@ function keyToAccel(key) {
   return Vector(0, 0);
 }
 
+// Setup the page.
 $(document).ready(function () {
-  theView = new View([0, 0], 64);
-  theView.snap = Snap("#mainSvg");
+  theView = new View([0, 0], 64, Snap("#mainSvg"));
   theWorld = new World(true);
   var entityPrototypes = [
     Stone,
@@ -30,7 +35,7 @@ $(document).ready(function () {
     Orbitter
   ];
   for (var i in entityPrototypes) {
-    theWorld.addEntityPrototype(entityPrototypes[i]);
+    theWorld.addEntityType(entityPrototypes[i]);
   }
   theWorld.populate();
   theWorld.grid.eachEntity(function (entity) {
@@ -38,21 +43,21 @@ $(document).ready(function () {
   });
   var fpsText = theView.snap.text(0, -10, "FPS: ");
   var tpsText = theView.snap.text(80, -10, "TPS: ");
-  var INTERVAL = 10;
-  var count = 0;
+
+  var fpsCount = 0;
   var secondStart = getTime();
   var start = getTime();
   function redraw (timestamp) {
     var dT = timestamp - start;
     start = timestamp;
-    ++count;
+    ++fpsCount;
     if (getTime() - secondStart >= 1000) {
       secondStart = getTime();
       fpsText.attr({
         fill: '#fff',
-        text: 'FPS: ' + count,
+        text: 'FPS: ' + fpsCount,
       });
-      count = 0;
+      fpsCount = 0;
     }
     var dT = dT + 0.1;
     if (dT >= 2) {
@@ -62,22 +67,25 @@ $(document).ready(function () {
   }
   redraw();
 
-  var ticks = 0;
+  // Update the world.
+  var targetTPS = 20;
+  var tpsCount = 0;
   var ticksSecondStart = getTime();
   function update () {
-    ++ticks;
+    ++tpsCount;
     if (getTime() - ticksSecondStart >= 1000) {
       ticksSecondStart = getTime();
       tpsText.attr({
         fill: '#fff',
-        text: 'TPS: ' + ticks,
+        text: 'TPS: ' + tpsCount,
       });
-      ticks = 0;
+      tpsCount = 0;
     }
-    theWorld.update(theView);
+    theWorld.update(theView, 1 / targetTPS);
   }
-  setInterval(update, 50);
+  setInterval(update, 1000 / targetTPS);
 
+  // Handle keyboard input.
   var downKeys = {};
 
   $(document).keypress(function (evt) {
