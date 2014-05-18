@@ -7,6 +7,7 @@ var Orbitter = function (pos, world) {
   Entity.call(this, pos);
   this.refreshRate = world.prng() * 0.01;
   this.target = this.findTarget(world);
+  this.speed = (1 / -Math.log(this.refreshRate));
 };
 
 Orbitter.prototype = Object.create(Entity);
@@ -40,7 +41,7 @@ Orbitter.prototype.update = function (world, view, dT) {
   var dist = Math.sqrt(d[0] * d[0] + d[1] * d[1]);
   var r = Math.atan2(d[1], d[0]);
   var oldR = r;
-  var dR = dT * 2 * Math.PI * (0.001 / this.refreshRate);
+  var dR = dT * 2 * Math.PI * this.speed;
   r += dR;
   var dP = Vector(Math.cos(r), Math.sin(r), 2).scale(0.6 + 5 * dist / 8);
   var newPos = world.grid.clipInto(this.target.pos.add(dP), 1, 1);
