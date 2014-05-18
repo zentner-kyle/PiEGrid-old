@@ -5,9 +5,9 @@
 
 var Orbitter = function (pos, world) {
   Entity.call(this, pos);
-  this.refreshRate = world.prng() * 0.01 + 0.05;
+  this.refreshPeriod = world.prng() * 0.01 + 0.05;
   this.target = this.findTarget(world);
-  this.speed = (0.5 / -Math.log(this.refreshRate));
+  this.speed = (0.5 / -Math.log(this.refreshPeriod));
 };
 
 Orbitter.prototype = Object.create(Entity);

@@ -32,11 +32,11 @@ World.prototype.addEntityType = function (proto) {
 
 // Add an entity to the world.
 World.prototype.addEntity = function (entity, p) {
-  if (entity.refreshRate) {
+  if (entity.refreshPeriod) {
     this.refreshList.push({
       entity: entity,
       lastUpdate: this.age(),
-      nextUpdate: this.age() + entity.refreshRate
+      nextUpdate: this.age() + entity.refreshPeriod
     });
   }
   this.grid.addEntity(entity, p);
@@ -54,7 +54,7 @@ World.prototype.update = function (view, dT) {
         ref.entity.update(this, view,
             (this.totalTime - ref.lastUpdate));
         ref.lastUpdate = this.age();
-        ref.nextUpdate = this.age() + ref.entity.refreshRate;
+        ref.nextUpdate = this.age() + ref.entity.refreshPeriod;
       }
     }
   });
